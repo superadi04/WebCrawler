@@ -12,6 +12,10 @@ import org.attoparser.simple.*;
  */
 public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
 
+    private StringBuilder sb;
+
+    private WebIndex index;
+
     public CrawlingMarkupHandler() {}
 
     /**
@@ -49,6 +53,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     */
     public void handleDocumentStart(long startTimeNanos, int line, int col) {
         // TODO: Implement this.
+        index = new WebIndex();
         System.out.println("Start of document");
     }
 
@@ -74,6 +79,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     */
     public void handleOpenElement(String elementName, Map<String, String> attributes, int line, int col) {
         // TODO: Implement this.
+        sb = new StringBuilder();
         System.out.println("Start element: " + elementName);
     }
 
@@ -111,6 +117,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
                     break;
                 case '\n':
                     System.out.print("\\n");;
+                    break;
                 case '\r':
                     System.out.print("\\r");
                     break;

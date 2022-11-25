@@ -1,5 +1,8 @@
 package assignment;
 
+import java.io.*;
+import java.util.*;
+
 /**
  * A web-index which efficiently stores information about pages. Serialization is done automatically
  * via the superclass "Index" and Java's Serializable interface.
@@ -15,4 +18,14 @@ public class WebIndex extends Index {
     // TODO: Implement all of this! You may choose your own data structures an internal APIs.
     // You should not need to worry about serialization (just make any other data structures you use
     // here also serializable - the Java standard library data structures already are, for example).
+
+    private List<Page> pages;
+
+    public WebIndex() {
+
+    }
+
+    public List<Page> getPages() {
+        return pages;
+    }
 }
