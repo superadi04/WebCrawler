@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <exclude-output />
     <content url="file://$MODULE_DIR$/prog7">
       <sourceFolder url="file://$MODULE_DIR$/prog7/src/main/java" isTestSource="false" />
-    </content>
-    <content url="file://$MODULE_DIR$/prog7/src/test/java/assignment">
-      <sourceFolder url="file://$MODULE_DIR$/prog7/src/test/java/assignment" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/prog7/src/test/java" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -14,6 +11,22 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/prog7/attoparser-2.0.0.BETA2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="JUnit5.8.1">
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter/5.8.1/junit-jupiter-5.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-api/5.8.1/junit-jupiter-api-5.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-commons/1.8.1/junit-platform-commons-1.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-params/5.8.1/junit-jupiter-params-5.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-engine/5.8.1/junit-jupiter-engine-5.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-engine/1.8.1/junit-platform-engine-1.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

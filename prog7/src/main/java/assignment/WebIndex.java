@@ -22,10 +22,14 @@ public class WebIndex extends Index {
     private List<Page> pages;
 
     public WebIndex() {
-
+        pages = new ArrayList<>();
     }
 
     public List<Page> getPages() {
         return pages;
+    }
+
+    public void addPage(Page page) {
+        pages.add(page);
     }
 }

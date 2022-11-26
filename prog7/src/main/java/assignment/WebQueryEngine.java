@@ -33,12 +33,6 @@ public class WebQueryEngine {
         return new WebQueryEngine(index);
     }
 
-    public static void main(String[] args) {
-        WebQueryEngine q = new WebQueryEngine();
-        q.query("((wealth & (!fame | prop)) | \"happiness and love\")");
-        System.out.println("hi");
-    }
-
     /**
      * Returns a Collection of URLs (as Strings) of web pages satisfying the query expression.
      *
@@ -49,15 +43,15 @@ public class WebQueryEngine {
         try {
             currQuery = query.toCharArray();
             this.root = parseQuery();
+            Set<Page> ans = processQuery(this.root, new HashSet<>());
+            return ans;
         } catch (Exception e) {
             System.err.println("Invalid query format.");
         }
-
-        // TODO: Implement this!
-        return new HashSet<>();
+        return null;
     }
 
-    private Set<Page> processQuery(Node n, HashSet<Page> ans) {
+    private Set<Page> processQuery(Node n, Set<Page> ans) {
         if (n.isLeafNode()) {
             return searchWord(n.data);
         }
@@ -83,8 +77,8 @@ public class WebQueryEngine {
 
     private Set<Page> union(Set<Page> a, Set<Page> b) {
         Set<Page> ans = new HashSet<>();
-        a.addAll(ans);
-        b.addAll(ans);
+        ans.addAll(a);
+        ans.addAll(b);
         return ans;
     }
 
@@ -117,7 +111,7 @@ public class WebQueryEngine {
 
         StringBuilder word = new StringBuilder();
 
-        while (!checkToken(c)) {
+        while (!checkToken(c) && currQueryIndex + 1 < currQuery.length) {
             word.append(c);
             c = currQuery[++currQueryIndex];
         }
