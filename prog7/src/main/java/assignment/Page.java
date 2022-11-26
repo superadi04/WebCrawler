@@ -36,23 +36,24 @@ public class Page {
         return this.url.equals(p.url);
     }
 
-    // TEMPORARY
-    public void addWord(String word) {
-        if (map.containsKey(word)) {
-
-        } else {
-            map.put(word, null);
+    public boolean checkQuery(String word) {
+        if (word.charAt(0) == '"' && word.charAt(word.length() - 1) == '"') {
+            return containsPhrase(word);
         }
+
+        return implicitAnd(word);
     }
 
     public boolean containsPhrase(String word) {
+        word = word.substring(1, word.length() - 1);
+
         StringTokenizer st = new StringTokenizer(word);
 
         String curr = st.nextToken();
 
         while (st.hasMoreTokens()) {
             String next = st.nextToken();
-            if (map.containsKey(curr) && map.get(curr).contains(next)) {
+            if (!map.containsKey(curr) || (map.containsKey(curr) && !map.get(curr).contains(next))) {
                 return false;
             }
             curr = next;
@@ -61,8 +62,18 @@ public class Page {
         return map.containsKey(curr);
     }
 
-    public boolean containsWord(String word) {
-        return map.containsKey(word);
+    public boolean implicitAnd(String word) {
+        StringTokenizer st = new StringTokenizer(word);
+
+        while (st.hasMoreTokens()) {
+            String curr = st.nextToken();
+
+            if (!map.containsKey(curr)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void addSequence(String first, String second) {

@@ -68,7 +68,7 @@ public class WebQueryEngine {
     private Set<Page> searchWord(String word) {
         Set<Page> pages = new HashSet<>();
         for (Page p : index.getPages()) {
-            if ((word.charAt(0) == '!' && !p.containsWord(word)) || (word.charAt(0) != '!' && p.containsWord(word))) {
+            if ((word.charAt(0) == '!' && !p.checkQuery(word.substring(1))) || (word.charAt(0) != '!' && p.checkQuery(word))) {
                 pages.add(p);
             }
         }
@@ -111,9 +111,9 @@ public class WebQueryEngine {
 
         StringBuilder word = new StringBuilder();
 
-        while (!checkToken(c) && currQueryIndex + 1 < currQuery.length) {
+        while (!checkToken(c) && currQueryIndex < currQuery.length) {
             word.append(c);
-            c = currQuery[++currQueryIndex];
+            c = currQuery[Math.min(currQuery.length - 1, ++currQueryIndex)];
         }
 
         return word.toString().trim();

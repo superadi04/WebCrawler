@@ -104,7 +104,6 @@ public class Tests {
     @Test
     public void checkPhrase() throws MalformedURLException {
         Page p1 = new Page(new URL("http://www.google.com"));
-        Page p2 = new Page(new URL("http://www.facebook.com"));
 
         p1.addText("unicorn sheet clear color");
 
@@ -112,7 +111,21 @@ public class Tests {
         index.addPage(p1);
 
         WebQueryEngine engine = WebQueryEngine.fromIndex(index);
-        Collection<Page> answer = engine.query("!people");
-        Assertions.assertTrue(answer.contains(p1) && answer.contains(p2) && answer.size() == 2);
+        Collection<Page> answer = engine.query("\"unicorn sheet clear\"");
+        Assertions.assertTrue(answer.contains(p1) && answer.size() == 1);
+    }
+
+    @Test
+    public void implicitAndQuery() throws MalformedURLException {
+        Page p1 = new Page(new URL("http://www.google.com"));
+
+        p1.addText("unicorn sheet clear color");
+
+        WebIndex index = new WebIndex();
+        index.addPage(p1);
+
+        WebQueryEngine engine = WebQueryEngine.fromIndex(index);
+        Collection<Page> answer = engine.query("unicorn color");
+        Assertions.assertTrue(answer.contains(p1) && answer.size() == 1);
     }
 }
