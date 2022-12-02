@@ -13,17 +13,28 @@ import org.attoparser.simple.*;
 public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
 
     private StringBuilder sb;
-
     private WebIndex index;
+    private List<URL> urls;
+    private long startTime;
+    private long endTime;
+    private Stack<String> tags;
 
-    public CrawlingMarkupHandler() {}
+    private URL currURL;
+
+    public CrawlingMarkupHandler() {
+        urls = new ArrayList<>();
+        tags = new Stack<>();
+    }
+
+    public void setCurrURL(URL currURL) {
+        this.currURL = currURL;
+    }
 
     /**
     * This method returns the complete index that has been crawled thus far when called.
     */
     public Index getIndex() {
-        // TODO: Implement this!
-        return new WebIndex();
+        return index;
     }
 
     /**
@@ -31,8 +42,9 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * should be cleared.
     */
     public List<URL> newURLs() {
-        // TODO: Implement this!
-        return new LinkedList<>();
+        List<URL> urlsReturn = this.urls;
+        this.urls = new ArrayList<>();
+        return urlsReturn;
     }
 
     /**
@@ -52,9 +64,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col             the column of the document where parsing starts
     */
     public void handleDocumentStart(long startTimeNanos, int line, int col) {
-        // TODO: Implement this.
-        index = new WebIndex();
-        System.out.println("Start of document");
+        this.startTime = startTimeNanos;
     }
 
     /**
@@ -66,8 +76,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col             the column of the document where the parsing ends
     */
     public void handleDocumentEnd(long endTimeNanos, long totalTimeNanos, int line, int col) {
-        // TODO: Implement this.
-        System.out.println("End of document");
+        this.endTime = endTimeNanos;
     }
 
     /**
@@ -78,9 +87,18 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears
     */
     public void handleOpenElement(String elementName, Map<String, String> attributes, int line, int col) {
-        // TODO: Implement this.
-        sb = new StringBuilder();
-        System.out.println("Start element: " + elementName);
+        if (elementName.equals("a")) {
+            String link = attributes.get("href");
+            if (link != null && (link.endsWith(".html") || link.endsWith(".htm"))) {
+                try {
+                    URL next = new URL(currURL, link);
+                    urls.add(next);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException();
+                }
+            }
+
+        }
     }
 
     /**
@@ -90,8 +108,9 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears.
     */
     public void handleCloseElement(String elementName, int line, int col) {
-        // TODO: Implement this.
-        System.out.println("End element:   " + elementName);
+        if (!tags.isEmpty() && tags.peek().equals(elementName)) {
+            tags.pop();
+        }
     }
 
     /**
@@ -103,6 +122,8 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param length  number of characters in ch
     */
     public void handleText(char[] ch, int start, int length, int line, int col) {
+        StringBuilder sb = new StringBuilder();
+
         // TODO: Implement this.
         System.out.print("Characters:    \"");
 

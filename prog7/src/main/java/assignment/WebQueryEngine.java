@@ -25,10 +25,6 @@ public class WebQueryEngine {
         this.index = index;
     }
 
-    private WebQueryEngine() {
-
-    }
-
     public static WebQueryEngine fromIndex(WebIndex index) {
         return new WebQueryEngine(index);
     }

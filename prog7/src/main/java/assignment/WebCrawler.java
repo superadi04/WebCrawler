@@ -42,9 +42,11 @@ public class WebCrawler {
         // Try to start crawling, adding new URLS as we see them.
         try {
             while (!remaining.isEmpty()) {
-                // Parse the next URL's page
-                parser.parse(new InputStreamReader(remaining.poll().openStream()), handler);
+                URL currURL = remaining.poll();
+                handler.setCurrURL(currURL);
 
+                // Parse the next URL's page
+                parser.parse(new InputStreamReader(currURL.openStream()), handler);
                 // Add any new URLs
                 remaining.addAll(handler.newURLs());
             }
