@@ -39,18 +39,21 @@ public class WebCrawler {
         ISimpleMarkupParser parser = new SimpleMarkupParser(ParseConfiguration.htmlConfiguration());
         CrawlingMarkupHandler handler = new CrawlingMarkupHandler();
 
+        int count = 0;
+
         // Try to start crawling, adding new URLS as we see them.
         try {
             while (!remaining.isEmpty()) {
                 URL currURL = remaining.poll();
-                handler.setCurrURL(currURL);
+                handler.setCurrPage(currURL);
+                count++;
 
                 // Parse the next URL's page
                 parser.parse(new InputStreamReader(currURL.openStream()), handler);
                 // Add any new URLs
                 remaining.addAll(handler.newURLs());
             }
-
+            System.out.println(count);
             handler.getIndex().save("index.db");
         } catch (Exception e) {
             // Bad exception handling :(

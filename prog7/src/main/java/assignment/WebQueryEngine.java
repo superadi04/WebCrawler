@@ -1,11 +1,12 @@
 package assignment;
+import java.awt.print.Pageable;
+import java.net.MalformedURLException;
 import java.util.*;
 
 /**
  * A query engine which holds an underlying web index and can answer textual queries with a
  * collection of relevant pages.
  *
- * TODO: Implement this!
  */
 
 public class WebQueryEngine {
@@ -29,63 +30,56 @@ public class WebQueryEngine {
         return new WebQueryEngine(index);
     }
 
+    /*
     /**
      * Returns a Collection of URLs (as Strings) of web pages satisfying the query expression.
      *
      * @param query A query expression.
      * @return A collection of web pages satisfying the query.
      */
+
     public Collection<Page> query(String query) {
         try {
             currQuery = query.toCharArray();
             this.root = parseQuery();
-            Set<Page> ans = processQuery(this.root, new HashSet<>());
-            return ans;
+            return parseTree(root);
         } catch (Exception e) {
             System.err.println("Invalid query format.");
         }
-        return null;
-    }
-
-    private Set<Page> processQuery(Node n, Set<Page> ans) {
-        if (n.isLeafNode()) {
-            return searchWord(n.data);
-        }
-
-        if (n.data.equals("&")) {
-            return intersection(processQuery(n.left, ans), processQuery(n.right, ans));
-        } else if (n.data.equals("|")) {
-            return union(processQuery(n.left, ans), processQuery(n.right, ans));
-        }
 
         return null;
+
     }
 
-    private Set<Page> searchWord(String word) {
-        Set<Page> pages = new HashSet<>();
-        for (Page p : index.getPages()) {
-            if ((word.charAt(0) == '!' && !p.checkQuery(word.substring(1))) || (word.charAt(0) != '!' && p.checkQuery(word))) {
-                pages.add(p);
+    private Set<Page> parseTree(Node curr) throws MalformedURLException {
+        if (curr.isLeafNode()) {
+            return index.getPagesForQuery(curr.data, curr.isPhrase);
+        } else {
+            if (curr.data.get(0).charAt(0) == '&') {
+                return intersection(parseTree(curr.left), parseTree(curr.right));
+            } else {
+                return union(parseTree(curr.left), parseTree(curr.right));
             }
         }
-        return pages;
-    }
-
-    private Set<Page> union(Set<Page> a, Set<Page> b) {
-        Set<Page> ans = new HashSet<>();
-        ans.addAll(a);
-        ans.addAll(b);
-        return ans;
     }
 
     private Set<Page> intersection(Set<Page> a, Set<Page> b) {
-        Set<Page> ans = new HashSet<>();
+        Set<Page> intersectionSet = new HashSet<>();
+
         for (Page p : a) {
             if (b.contains(p)) {
-                ans.add(p);
+                intersectionSet.add(p);
             }
         }
-        return ans;
+
+        return intersectionSet;
+    }
+
+    private Set<Page> union(Set<Page> a, Set<Page> b) {
+        Set<Page> unionSet = new HashSet<>();
+        unionSet.addAll(a);
+        unionSet.addAll(b);
+        return unionSet;
     }
 
     private String getToken() {
@@ -138,19 +132,32 @@ public class WebQueryEngine {
     private class Node {
         private Node left;
         private Node right;
-        private String data;
+        private List<String> data;
+        private boolean isPhrase;
 
-        private Node(String data, Node left, Node right) {
-            this.data = data;
+        private Node(String operator, Node left, Node right) {
             this.left = left;
             this.right = right;
+            data = new ArrayList<>();
+            data.add(operator);
         }
 
-        private Node(String data) {
-            this.data = data;
+        private Node(String operator) {
+            data = new ArrayList<>();
+
+            if (operator.charAt(0) == '"' && operator.charAt(operator.length() - 1) == '"') {
+                isPhrase = true;
+                operator = operator.substring(1, operator.length() - 1);
+            }
+
+            StringTokenizer st = new StringTokenizer(operator);
+
+            while (st.hasMoreTokens()) {
+                data.add(st.nextToken().toLowerCase());
+            }
         }
 
-        private boolean isLeafNode () {
+        private boolean isLeafNode() {
             return this.left == null && this.right == null;
         }
     }

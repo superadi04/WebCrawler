@@ -11,30 +11,32 @@ import org.attoparser.simple.*;
  * TODO: Implement this!
  */
 public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
-
-    private StringBuilder sb;
     private WebIndex index;
     private List<URL> urls;
     private long startTime;
     private long endTime;
     private Stack<String> tags;
-
-    private URL currURL;
+    private Set<URL> visitedURLS;
+    private Page currPage;
 
     public CrawlingMarkupHandler() {
         urls = new ArrayList<>();
         tags = new Stack<>();
+        index = new WebIndex();
+        visitedURLS = new HashSet<>();
     }
 
-    public void setCurrURL(URL currURL) {
-        this.currURL = currURL;
+    public void setCurrPage(URL currURL) {
+        visitedURLS.add(currURL);
+        this.currPage = new Page(currURL);
+        index.addPage(currPage);
     }
 
     /**
     * This method returns the complete index that has been crawled thus far when called.
     */
-    public Index getIndex() {
-        return index;
+    public WebIndex getIndex() {
+        return this.index;
     }
 
     /**
@@ -87,18 +89,25 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears
     */
     public void handleOpenElement(String elementName, Map<String, String> attributes, int line, int col) {
-        if (elementName.equals("a")) {
+        /*
+        if (elementName.equals("a") || elementName.equals("area") || elementName.equals("base") || elementName.equals("link")) {
             String link = attributes.get("href");
+
             if (link != null && (link.endsWith(".html") || link.endsWith(".htm"))) {
+                URL next;
+
                 try {
-                    URL next = new URL(currURL, link);
-                    urls.add(next);
+                    next = new URL(currPage.getURL(), link);
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(e);
+                }
+
+                if (!visitedURLS.contains(next)) {
+                    visitedURLS.add(next);
+                    urls.add(next);
                 }
             }
-
-        }
+        }*/
     }
 
     /**
@@ -122,35 +131,30 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param length  number of characters in ch
     */
     public void handleText(char[] ch, int start, int length, int line, int col) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder currWord = new StringBuilder();
 
-        // TODO: Implement this.
-        System.out.print("Characters:    \"");
+        for (int i = start; i < start + length; i++) {
+            if (ch[i] == '\n') {
 
-        for(int i = start; i < start + length; i++) {
-            // Instead of printing raw whitespace, we're escaping it
-            switch(ch[i]) {
-                case '\\':
-                    System.out.print("\\\\");
-                    break;
-                case '"':
-                    System.out.print("\\\"");
-                    break;
-                case '\n':
-                    System.out.print("\\n");;
-                    break;
-                case '\r':
-                    System.out.print("\\r");
-                    break;
-                case '\t':
-                    System.out.print("\\t");
-                    break;
-                default:
-                    System.out.print(ch[i]);
-                    break;
+            }
+
+            if (isAlphaNumeric(ch[i])) {
+                currWord.append(ch[i]);
+            } else if (currWord.length() > 0) {
+                if (currWord.toString().equals("Ensure")) {
+                    System.out.println("aisd");
+                }
+                index.addWord(currPage, currWord.toString().toLowerCase(), line, i - start);
+                currWord = new StringBuilder();
             }
         }
 
-        System.out.print("\"\n");
+        if (!currWord.isEmpty()) {
+            index.addWord(currPage, currWord.toString().toLowerCase(), line, length);
+        }
+    }
+
+    private boolean isAlphaNumeric(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }
 }
