@@ -16,7 +16,7 @@ public class Tests {
     @Test
     public void shouldAndQuiet() throws MalformedURLException {
         Queue<URL> remaining = new LinkedList<>();
-        remaining.add(new URL("file:///Users/adityachebrolu/Documents/GitHub/WebCrawler/prog7/president96/www.dolekemp96.org/interactive/computer/leader.html"));
+        remaining.add(new URL("file:///Users/adityachebrolu/Documents/GitHub/WebCrawler/prog7/president96/index.html"));
 
         ISimpleMarkupParser parser = new SimpleMarkupParser(ParseConfiguration.htmlConfiguration());
         CrawlingMarkupHandler handler = new CrawlingMarkupHandler();
@@ -44,48 +44,17 @@ public class Tests {
         }
 
         WebQueryEngine engine = WebQueryEngine.fromIndex(handler.getIndex());
-        Collection<Page> ans = engine.query("\"Ensure that this MIME mapping is needed for your Web server before adding it to the list\"");
-
+        Collection<Page> ans = engine.query("officials (hello & john) senator");
         System.out.println(ans.size());
-    }
-
-    /*
-    @Test
-    public void checkAndQueryOne() throws MalformedURLException {
-        Page p1 = new Page(new URL("http://www.google.com"));
-        Page p2 = new Page(new URL("http://www.facebook.com"));
-
-        p1.addText("unicorn sheet clear color");
-
-        p2.addText("unicorn horse color");
-
-        WebIndex index = new WebIndex();
-        index.addPage(p1);
-        index.addPage(p2);
-
-        WebQueryEngine engine = WebQueryEngine.fromIndex(index);
-        Collection<Page> answer = engine.query("(sheet & clear)");
-        Assertions.assertTrue(answer.contains(p1) && answer.size() == 1);
     }
 
     @Test
     public void checkAndQueryNone() throws MalformedURLException {
-        Page p1 = new Page(new URL("http://www.google.com"));
-        Page p2 = new Page(new URL("http://www.facebook.com"));
-
-        p1.addText("unicorn sheet clear color");
-
-        p2.addText("unicorn horse color");
-
-        WebIndex index = new WebIndex();
-        index.addPage(p1);
-        index.addPage(p2);
-
-        WebQueryEngine engine = WebQueryEngine.fromIndex(index);
-        Collection<Page> answer = engine.query("(sheet & horse)");
-        Assertions.assertTrue(answer.size() == 0);
+        WebQueryEngine engine = new WebQueryEngine();
+        engine.query("((solve | hard) & !done)");
     }
 
+    /*
     @Test
     public void checkAndQueryBoth() throws MalformedURLException {
         Page p1 = new Page(new URL("http://www.google.com"));

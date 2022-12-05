@@ -19,11 +19,14 @@ public class WebQueryEngine {
 
     private char[] currQuery;
     private int currQueryIndex;
-    private Node root;
     private WebIndex index;
 
     private WebQueryEngine(WebIndex index) {
         this.index = index;
+    }
+
+    public WebQueryEngine() {
+        // FOR TESTING
     }
 
     public static WebQueryEngine fromIndex(WebIndex index) {
@@ -40,9 +43,16 @@ public class WebQueryEngine {
 
     public Collection<Page> query(String query) {
         try {
-            currQuery = query.toCharArray();
-            this.root = parseQuery();
-            return parseTree(root);
+            this.currQuery = query.toCharArray();
+            Stack<String> ans = convertToPostfix(query);
+
+            while (!ans.isEmpty()) {
+                System.out.println(ans.pop());
+            }
+            //test(query);
+
+            //this.root = parseQuery();
+            //return parseTree(root);
         } catch (Exception e) {
             System.err.println("Invalid query format.");
         }
@@ -51,20 +61,103 @@ public class WebQueryEngine {
 
     }
 
-    private Set<Page> parseTree(Node curr) throws MalformedURLException {
-        if (curr.isLeafNode()) {
-            return index.getPagesForQuery(curr.data, curr.isPhrase);
-        } else {
-            if (curr.data.get(0).charAt(0) == '&') {
-                return intersection(parseTree(curr.left), parseTree(curr.right));
-            } else {
-                return union(parseTree(curr.left), parseTree(curr.right));
+    private Set<Page> performQuery(String query) {
+        Stack<String> postfix = convertToPostfix(query);
+        Set<Page> ans = new HashSet<>();
+
+        if (postfix.isEmpty()) {
+            return ans;
+        }
+
+        while (!postfix.isEmpty()) {
+            List<String> words = new ArrayList<>();
+            while (!postfix.isEmpty() && checkToken(postfix.peek().charAt(0)) {
+                postfix.pop();
             }
         }
     }
 
+    // Shunting-Yard Algorithm
+    private Stack<String> convertToPostfix(String query) {
+        String s = getToken();
+        Stack<Character> tokens = new Stack<>();
+        Stack<String> ans = new Stack<>();
+
+        while (s != null) {
+            if (stringCharCheck(s, '&') || stringCharCheck(s, '|') || stringCharCheck(s, '(')) {
+                tokens.push(s.charAt(0));
+            } else if (stringCharCheck(s, ')')) {
+                while (!tokens.isEmpty() && tokens.peek() != '(') {
+                    ans.push(Character.toString(tokens.pop()));
+                }
+                if (!tokens.isEmpty()) {
+                    tokens.pop();
+                }
+            } else {
+                ans.push(s);
+            }
+            s = getToken();
+        }
+
+        return ans;
+    }
+
+    private boolean stringCharCheck(String s, char c) {
+        return s.length() == 1 && s.charAt(0) == c;
+    }
+
+    private String getToken() {
+        while (currQueryIndex < currQuery.length && currQuery[currQueryIndex] == ' ') {
+            currQueryIndex++;
+        }
+
+        if (currQueryIndex >= currQuery.length) {
+            return null;
+        }
+
+        char c = currQuery[currQueryIndex++];
+
+        if (checkToken(c)) {
+            return Character.toString(c);
+        }
+
+        StringBuilder word = new StringBuilder();
+        word.append(c);
+
+        if (c == '"') {
+            while (currQueryIndex < currQuery.length && currQuery[currQueryIndex] != '"') {
+                word.append(currQuery[currQueryIndex++]);
+            }
+            if (currQueryIndex < currQuery.length) {
+                word.append(currQuery[currQueryIndex++]);
+            }
+        } else {
+            while (currQueryIndex < currQuery.length && !checkToken(currQuery[currQueryIndex]) && currQuery[currQueryIndex] != ' ') {
+                word.append(currQuery[currQueryIndex++]);
+            }
+        }
+
+        return word.toString().trim();
+    }
+
+
+    /*private Stack<String> getPostfix(char[] currQuery) {
+        Stack<Character> tokens = new Stack<>();
+        Stack<String> ans = new Stack<>();
+
+        String currToken = getToken();
+
+        while (currToken != null) {
+
+        }
+    }*/
+
+    public boolean checkToken(char c) {
+        return c == '&' || c == '|' || c == '(' || c == ')';
+    }
+
     private Set<Page> intersection(Set<Page> a, Set<Page> b) {
-        Set<Page> intersectionSet = new HashSet<>();
+        HashSet<Page> intersectionSet = new HashSet<>();
 
         for (Page p : a) {
             if (b.contains(p)) {
@@ -76,41 +169,23 @@ public class WebQueryEngine {
     }
 
     private Set<Page> union(Set<Page> a, Set<Page> b) {
-        Set<Page> unionSet = new HashSet<>();
+        HashSet<Page> unionSet = new HashSet<>();
         unionSet.addAll(a);
         unionSet.addAll(b);
         return unionSet;
     }
 
-    private String getToken() {
-        if (currQueryIndex >= currQuery.length) {
-            return null;
-        }
-
-        char c = currQuery[currQueryIndex];
-
-        if (checkToken(c)) {
-            char token = currQuery[currQueryIndex++];
-
-            while (currQueryIndex < currQuery.length && currQuery[currQueryIndex] == ' ') {
-                currQueryIndex++;
+    /*
+    private Set<Page> parseTree(Node curr) {
+        if (curr.isLeafNode()) {
+            return index.getPagesForQuery(curr.data, curr.isPhrase);
+        } else {
+            if (curr.data.get(0).charAt(0) == '&') {
+                return intersection(parseTree(curr.left), parseTree(curr.right));
+            } else {
+                return union(parseTree(curr.left), parseTree(curr.right));
             }
-
-            return Character.toString(token);
         }
-
-        StringBuilder word = new StringBuilder();
-
-        while (!checkToken(c) && currQueryIndex < currQuery.length) {
-            word.append(c);
-            c = currQuery[Math.min(currQuery.length - 1, ++currQueryIndex)];
-        }
-
-        return word.toString().trim();
-    }
-
-    public boolean checkToken(char c) {
-        return c == '&' || c == '|' || c == '(' || c == ')';
     }
 
     private Node parseQuery() throws Exception {
@@ -132,7 +207,7 @@ public class WebQueryEngine {
     private class Node {
         private Node left;
         private Node right;
-        private List<String> data;
+        private ArrayList<String> data;
         private boolean isPhrase;
 
         private Node(String operator, Node left, Node right) {
@@ -160,5 +235,5 @@ public class WebQueryEngine {
         private boolean isLeafNode() {
             return this.left == null && this.right == null;
         }
-    }
+    }*/
 }

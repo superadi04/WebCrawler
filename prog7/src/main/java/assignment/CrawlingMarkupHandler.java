@@ -18,12 +18,16 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     private Stack<String> tags;
     private Set<URL> visitedURLS;
     private Page currPage;
+    private int wordCount;
+    private int tagCount;
 
     public CrawlingMarkupHandler() {
         urls = new ArrayList<>();
         tags = new Stack<>();
         index = new WebIndex();
         visitedURLS = new HashSet<>();
+        wordCount = 0;
+        tagCount = 0;
     }
 
     public void setCurrPage(URL currURL) {
@@ -89,7 +93,6 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears
     */
     public void handleOpenElement(String elementName, Map<String, String> attributes, int line, int col) {
-        /*
         if (elementName.equals("a") || elementName.equals("area") || elementName.equals("base") || elementName.equals("link")) {
             String link = attributes.get("href");
 
@@ -99,7 +102,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
                 try {
                     next = new URL(currPage.getURL(), link);
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
+                    return;
                 }
 
                 if (!visitedURLS.contains(next)) {
@@ -107,7 +110,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
                     urls.add(next);
                 }
             }
-        }*/
+        }
     }
 
     /**
@@ -134,23 +137,17 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
         StringBuilder currWord = new StringBuilder();
 
         for (int i = start; i < start + length; i++) {
-            if (ch[i] == '\n') {
-
-            }
-
             if (isAlphaNumeric(ch[i])) {
                 currWord.append(ch[i]);
             } else if (currWord.length() > 0) {
-                if (currWord.toString().equals("Ensure")) {
-                    System.out.println("aisd");
-                }
-                index.addWord(currPage, currWord.toString().toLowerCase(), line, i - start);
+                index.addWord(currPage, currWord.toString().toLowerCase(), wordCount);
                 currWord = new StringBuilder();
+                wordCount++;
             }
         }
 
         if (!currWord.isEmpty()) {
-            index.addWord(currPage, currWord.toString().toLowerCase(), line, length);
+            index.addWord(currPage, currWord.toString().toLowerCase(), wordCount);
         }
     }
 

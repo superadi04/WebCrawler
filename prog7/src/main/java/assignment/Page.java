@@ -1,5 +1,6 @@
 package assignment;
 import java.io.BufferedReader;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 
@@ -10,11 +11,11 @@ import java.util.*;
  *
  * TODO: Implement this!
  */
-public class Page {
+public class Page implements Serializable {
     // The URL the page was located at.
     private URL url;
 
-    private Map<String, Set<String>> map;
+    //private static final long serialVersionUID = 1L;
 
     /**
      * Creates a Page with a given URL.
@@ -22,7 +23,6 @@ public class Page {
      */
     public Page(URL url) {
         this.url = url;
-        map = new HashMap<>();
     }
 
     /**
@@ -34,69 +34,5 @@ public class Page {
     public boolean equals(Object obj) {
         Page p = (Page) obj;
         return this.url.equals(p.url);
-    }
-
-    public boolean checkQuery(String word) {
-        if (word.charAt(0) == '"' && word.charAt(word.length() - 1) == '"') {
-            return containsPhrase(word);
-        }
-
-        return implicitAnd(word);
-    }
-
-    public boolean containsPhrase(String word) {
-        word = word.substring(1, word.length() - 1);
-
-        StringTokenizer st = new StringTokenizer(word);
-
-        String curr = st.nextToken();
-
-        while (st.hasMoreTokens()) {
-            String next = st.nextToken();
-            if (!map.containsKey(curr) || (map.containsKey(curr) && !map.get(curr).contains(next))) {
-                return false;
-            }
-            curr = next;
-        }
-
-        return map.containsKey(curr);
-    }
-
-    public boolean implicitAnd(String word) {
-        StringTokenizer st = new StringTokenizer(word);
-
-        while (st.hasMoreTokens()) {
-            String curr = st.nextToken();
-
-            if (!map.containsKey(curr)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public void addSequence(String first, String second) {
-        if (map.containsKey(first) && map.get(first) != null) {
-            map.get(first).add(second);
-        } else {
-            Set<String> set = new HashSet<>();
-            set.add(second);
-            map.put(first, set);
-        }
-    }
-
-    public void addText(String text) {
-        StringTokenizer st = new StringTokenizer(text);
-
-        String curr = st.nextToken();
-
-        while (st.hasMoreTokens()) {
-            String next = st.nextToken();
-            addSequence(curr, next);
-            curr = next;
-        }
-
-        map.put(curr, null);
     }
 }

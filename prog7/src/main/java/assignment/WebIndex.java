@@ -16,15 +16,15 @@ public class WebIndex extends Index {
      * Needed for Serialization (provided by Index) - don't remove this!
      */
     private static final long serialVersionUID = 1L;
-    private Map<String, Map<Page, Set<Location>>> pages;
-    private Set<Page> visitedPages;
+    private HashMap<String, HashMap<Page, HashSet<Integer>>> pages;
+    private HashSet<Page> visitedPages;
 
     public WebIndex() {
-        pages = new TreeMap<>();
+        pages = new HashMap<>();
         visitedPages = new HashSet<>();
     }
 
-    public Set<Page> getPages() {
+    public HashSet<Page> getPages() {
         return this.visitedPages;
     }
 
@@ -32,22 +32,22 @@ public class WebIndex extends Index {
         visitedPages.add(page);
     }
 
-    public void addWord(Page page, String word, int line, int col) {
+    public void addWord(Page page, String word, int wordCount) {
         if (pages.containsKey(word)) {
-            Map<Page, Set<Location>> wordPages = pages.get(word);
+            HashMap<Page, HashSet<Integer>> wordPages = pages.get(word);
 
             if (wordPages.containsKey(page)) {
-                wordPages.get(page).add(new Location(line, col));
+                wordPages.get(page).add(wordCount);
             } else {
-                Set<Location> set = new HashSet<>();
-                set.add(new Location(line, col));
+                HashSet<Integer> set = new HashSet<>();
+                set.add(wordCount);
                 wordPages.put(page, set);
             }
         } else {
-            Map<Page, Set<Location>> wordPages = new HashMap<>();
+            HashMap<Page, HashSet<Integer>> wordPages = new HashMap<>();
 
-            Set<Location> set = new HashSet<>();
-            set.add(new Location(line, col));
+            HashSet<Integer> set = new HashSet<>();
+            set.add(wordCount);
 
             wordPages.put(page, set);
             pages.put(word, wordPages);
@@ -63,7 +63,7 @@ public class WebIndex extends Index {
             }
 
             Set<Page> wordPages = pages.get(word).keySet();
-            Set<Page> ans = new HashSet<>();
+            HashSet<Page> ans = new HashSet<>();
 
             for (Page page : visitedPages) {
                 if (!wordPages.contains(page)) {
@@ -81,25 +81,23 @@ public class WebIndex extends Index {
         return pages.get(word).keySet();
     }
 
-    private void queryHelper(List<String> data, Set<Page> currPages, int index, Page prevPage, Location prevLocation) {
+    private boolean queryHelper(ArrayList<String> data, Page currPage, int index, int prevLocation) {
         if (index == data.size()) {
-            currPages.add(prevPage);
+            return true;
         }
 
         if (pages.get(data.get(index)) == null) {
-            return;
+            return false;
         }
 
-        if (pages.get(data.get(index)).containsKey(prevPage)) {
-            for (Location currLocation : pages.get(data.get(index)).get(prevPage)) {
-                if ((currLocation.line == prevLocation.line && prevLocation.col + data.get(index).length() + 1 == currLocation.col) || (prevLocation.line + 1 == currLocation.line && currLocation.col == 0)) {
-                    queryHelper(data, currPages, index + 1, prevPage, currLocation);
-                }
-            }
+        if (pages.get(data.get(index)).containsKey(currPage) && pages.get(data.get(index)).get(currPage).contains(prevLocation+1)) {
+            return queryHelper(data, currPage, index + 1, prevLocation+1);
         }
+
+        return false;
     }
 
-    public Set<Page> getPagesForQuery(List<String> data, boolean isPhrase) throws MalformedURLException {
+    public Set<Page> getPagesForQuery(ArrayList<String> data, boolean isPhrase) {
         Set<Page> ans = getPagesWord(data.get(0));
 
         if (ans.size() == 0) {
@@ -110,10 +108,10 @@ public class WebIndex extends Index {
             ans = new HashSet<>();
 
             for (Page page : pages.get(data.get(0)).keySet()) {
-                for (Location location : pages.get(data.get(0)).get(page)) {
-                    HashSet<Page> addToAns = new HashSet<>();
-                    queryHelper(data, addToAns, 1, page, location);
-                    ans.addAll(addToAns);
+                for (int location : pages.get(data.get(0)).get(page)) {
+                    if (queryHelper(data, page, 1, location)) {
+                        ans.add(page);
+                    }
                 }
             }
         } else {
@@ -135,22 +133,6 @@ public class WebIndex extends Index {
         }
 
         return ans;
-    }
-
-    private class Location {
-        private int line;
-        private int col;
-
-        private Location(int line, int col) {
-            this.line = line;
-            this.col = col;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            Location l = (Location) obj;
-            return this.line == l.line && this.col == l.col;
-        }
     }
 }
 
