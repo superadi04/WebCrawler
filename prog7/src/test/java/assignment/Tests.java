@@ -44,14 +44,14 @@ public class Tests {
         }
 
         WebQueryEngine engine = WebQueryEngine.fromIndex(handler.getIndex());
-        Collection<Page> ans = engine.query("officials (hello & john) senator");
+        Collection<Page> ans = engine.query("president available \"dole kemp\" !computer (actual | are)");
         System.out.println(ans.size());
     }
 
     @Test
-    public void checkAndQueryNone() throws MalformedURLException {
+    public void checkAndQueryNone() {
         WebQueryEngine engine = new WebQueryEngine();
-        engine.query("((solve | hard) & !done)");
+        engine.query("(dole & !kemp) \"medicare and medicaid\"");
     }
 
     /*

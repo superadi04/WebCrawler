@@ -44,15 +44,8 @@ public class WebQueryEngine {
     public Collection<Page> query(String query) {
         try {
             this.currQuery = query.toCharArray();
-            Stack<String> ans = convertToPostfix(query);
-
-            while (!ans.isEmpty()) {
-                System.out.println(ans.pop());
-            }
-            //test(query);
-
-            //this.root = parseQuery();
-            //return parseTree(root);
+            Set<Page> ans = performQuery();
+            return ans;
         } catch (Exception e) {
             System.err.println("Invalid query format.");
         }
@@ -61,24 +54,84 @@ public class WebQueryEngine {
 
     }
 
-    private Set<Page> performQuery(String query) {
-        Stack<String> postfix = convertToPostfix(query);
-        Set<Page> ans = new HashSet<>();
+    private Set<Page> performQuery() {
+        Stack<String> postfix = convertToPostfix();
 
         if (postfix.isEmpty()) {
-            return ans;
+            return new HashSet<>();
+        } else if (postfix.size() == 1) {
+            return index.getPagesForQuery(postfix.pop());
+        }
+
+        Set<Page> ans = new HashSet<>();
+        Stack<String> temp = new Stack<>();
+
+        while (!postfix.isEmpty()) {
+            temp.push(postfix.pop());
+            if (temp.peek().charAt(0) == '&' || temp.peek().charAt(0) == '|') {
+                char c = temp.pop().charAt(0);
+                if (c == '&') {
+                    ans = intersection(index.getPagesForQuery(temp.pop()), index.getPagesForQuery(temp.pop()));
+                } else {
+                    ans = union(index.getPagesForQuery(temp.pop()), index.getPagesForQuery(temp.pop()));
+                }
+                break;
+            }
         }
 
         while (!postfix.isEmpty()) {
-            List<String> words = new ArrayList<>();
-            while (!postfix.isEmpty() && checkToken(postfix.peek().charAt(0)) {
-                postfix.pop();
+            temp.push(postfix.pop());
+            if (temp.peek().charAt(0) == '&' || temp.peek().charAt(0) == '|') {
+                char c = temp.pop().charAt(0);
+                if (c == '&') {
+                    ans = intersection(ans, index.getPagesForQuery(temp.pop()));
+                } else {
+                    ans = union(ans, index.getPagesForQuery(temp.pop()));
+                }
             }
         }
+
+        while (!temp.isEmpty()) {
+            ans = intersection(ans, index.getPagesForQuery(temp.pop()));
+        }
+
+        return ans;
+        /*
+
+
+        String part1 = postfix.pop();
+        String part2 = postfix.pop();
+
+        Set<Page> ans;
+
+        if (postfix.isEmpty() || postfix.peek().equals("&") || !postfix.peek().equals("|")) {
+            if (postfix.peek().equals("&")) {
+                postfix.pop();
+            }
+            ans = intersection(index.getPagesForQuery(part1), index.getPagesForQuery(part2));
+        } else {
+            ans = union(index.getPagesForQuery(part1), index.getPagesForQuery(part2));
+        }
+
+        while (!postfix.isEmpty()) {
+            String part3 = postfix.pop();
+
+            if (postfix.isEmpty() || postfix.peek().equals("&") || !postfix.peek().equals("|")) {
+                if (postfix.peek().equals("&")) {
+                    postfix.pop();
+                }
+                ans = intersection(ans, index.getPagesForQuery(part3));
+            } else {
+                ans = union(ans, index.getPagesForQuery(part3));
+            }
+        }
+
+        return ans;
+        */
     }
 
     // Shunting-Yard Algorithm
-    private Stack<String> convertToPostfix(String query) {
+    private Stack<String> convertToPostfix() {
         String s = getToken();
         Stack<Character> tokens = new Stack<>();
         Stack<String> ans = new Stack<>();
@@ -99,7 +152,21 @@ public class WebQueryEngine {
             s = getToken();
         }
 
-        return ans;
+        while (!tokens.isEmpty()) {
+            ans.push(Character.toString(tokens.pop()));
+        }
+
+        return reverseStack(ans);
+    }
+
+    private Stack<String> reverseStack(Stack<String> input) {
+        Stack<String> newStack = new Stack<>();
+
+        while (!input.isEmpty()) {
+            newStack.push(input.pop());
+        }
+
+        return newStack;
     }
 
     private boolean stringCharCheck(String s, char c) {
@@ -140,18 +207,6 @@ public class WebQueryEngine {
         return word.toString().trim();
     }
 
-
-    /*private Stack<String> getPostfix(char[] currQuery) {
-        Stack<Character> tokens = new Stack<>();
-        Stack<String> ans = new Stack<>();
-
-        String currToken = getToken();
-
-        while (currToken != null) {
-
-        }
-    }*/
-
     public boolean checkToken(char c) {
         return c == '&' || c == '|' || c == '(' || c == ')';
     }
@@ -174,66 +229,4 @@ public class WebQueryEngine {
         unionSet.addAll(b);
         return unionSet;
     }
-
-    /*
-    private Set<Page> parseTree(Node curr) {
-        if (curr.isLeafNode()) {
-            return index.getPagesForQuery(curr.data, curr.isPhrase);
-        } else {
-            if (curr.data.get(0).charAt(0) == '&') {
-                return intersection(parseTree(curr.left), parseTree(curr.right));
-            } else {
-                return union(parseTree(curr.left), parseTree(curr.right));
-            }
-        }
-    }
-
-    private Node parseQuery() throws Exception {
-        String t = getToken();
-
-        if (t.equals("(")) {
-            Node left = parseQuery();
-            String operator = getToken();
-            Node right = parseQuery();
-            getToken(); // Right parenthesis
-            return new Node(operator, left, right);
-        } else if (t.length() >= 1) {
-            return new Node(t);
-        } else {
-            throw new Exception();
-        }
-    }
-
-    private class Node {
-        private Node left;
-        private Node right;
-        private ArrayList<String> data;
-        private boolean isPhrase;
-
-        private Node(String operator, Node left, Node right) {
-            this.left = left;
-            this.right = right;
-            data = new ArrayList<>();
-            data.add(operator);
-        }
-
-        private Node(String operator) {
-            data = new ArrayList<>();
-
-            if (operator.charAt(0) == '"' && operator.charAt(operator.length() - 1) == '"') {
-                isPhrase = true;
-                operator = operator.substring(1, operator.length() - 1);
-            }
-
-            StringTokenizer st = new StringTokenizer(operator);
-
-            while (st.hasMoreTokens()) {
-                data.add(st.nextToken().toLowerCase());
-            }
-        }
-
-        private boolean isLeafNode() {
-            return this.left == null && this.right == null;
-        }
-    }*/
 }

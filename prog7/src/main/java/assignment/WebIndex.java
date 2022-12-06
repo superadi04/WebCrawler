@@ -16,11 +16,11 @@ public class WebIndex extends Index {
      * Needed for Serialization (provided by Index) - don't remove this!
      */
     private static final long serialVersionUID = 1L;
-    private HashMap<String, HashMap<Page, HashSet<Integer>>> pages;
+    private TreeMap<String, HashMap<Page, HashSet<Integer>>> pages;
     private HashSet<Page> visitedPages;
 
     public WebIndex() {
-        pages = new HashMap<>();
+        pages = new TreeMap<>();
         visitedPages = new HashSet<>();
     }
 
@@ -97,42 +97,35 @@ public class WebIndex extends Index {
         return false;
     }
 
-    public Set<Page> getPagesForQuery(ArrayList<String> data, boolean isPhrase) {
-        Set<Page> ans = getPagesWord(data.get(0));
+    public Set<Page> getPagesForQuery(String data) {
+        Set<Page> ans = new HashSet<>();
 
-        if (ans.size() == 0) {
-            return ans;
-        }
+        if (data.charAt(0) == '"' && data.charAt(data.length() - 1) == '"') {
+            data = data.substring(1, data.length() - 1);
 
-        if (isPhrase) {
-            ans = new HashSet<>();
+            StringTokenizer st = new StringTokenizer(data);
+            ArrayList<String> tokens = new ArrayList<>();
 
-            for (Page page : pages.get(data.get(0)).keySet()) {
-                for (int location : pages.get(data.get(0)).get(page)) {
-                    if (queryHelper(data, page, 1, location)) {
+            while (st.hasMoreTokens()) {
+                tokens.add(st.nextToken().toLowerCase());
+            }
+
+            if (!pages.containsKey(tokens.get(0))) {
+                return ans;
+            }
+
+            for (Page page : pages.get(tokens.get(0)).keySet()) {
+                for (int location : pages.get(tokens.get(0)).get(page)) {
+                    if (queryHelper(tokens, page, 1, location)) {
                         ans.add(page);
                     }
                 }
             }
-        } else {
-            if (ans == null) {
-                return new HashSet<>();
-            }
 
-            for (int i = 1; i < data.size(); i++) {
-                Set<Page> pagesForWord = getPagesWord(data.get(i));
-                Set<Page> ans2 = new HashSet<>();
-
-                for (Page page : ans) {
-                    if (pagesForWord.contains(page)) {
-                        ans2.add(page);
-                    }
-                }
-                ans = ans2;
-            }
+            return ans;
         }
 
-        return ans;
+        return getPagesWord(data);
     }
 }
 
