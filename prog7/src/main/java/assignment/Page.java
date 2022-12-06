@@ -15,7 +15,7 @@ public class Page implements Serializable {
     // The URL the page was located at.
     private URL url;
 
-    //private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a Page with a given URL.

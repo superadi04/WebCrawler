@@ -16,7 +16,7 @@ public class Tests {
     @Test
     public void shouldAndQuiet() throws MalformedURLException {
         Queue<URL> remaining = new LinkedList<>();
-        remaining.add(new URL("file:///Users/adityachebrolu/Documents/GitHub/WebCrawler/prog7/president96/index.html"));
+        remaining.add(new URL("file:/Users/adityachebrolu/Documents/GitHub/WebCrawler/prog7/president96/index.html"));
 
         ISimpleMarkupParser parser = new SimpleMarkupParser(ParseConfiguration.htmlConfiguration());
         CrawlingMarkupHandler handler = new CrawlingMarkupHandler();
@@ -44,14 +44,14 @@ public class Tests {
         }
 
         WebQueryEngine engine = WebQueryEngine.fromIndex(handler.getIndex());
-        Collection<Page> ans = engine.query("president available \"dole kemp\" !computer (actual | are)");
+        Collection<Page> ans = engine.query("(\"internet is a\" | danger) the (!hello | !hi)");
         System.out.println(ans.size());
     }
 
     @Test
     public void checkAndQueryNone() {
         WebQueryEngine engine = new WebQueryEngine();
-        engine.query("(dole & !kemp) \"medicare and medicaid\"");
+        engine.query("(\"internet is a\" | danger) the (!hello | !hi)");
     }
 
     /*

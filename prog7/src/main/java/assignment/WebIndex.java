@@ -16,11 +16,11 @@ public class WebIndex extends Index {
      * Needed for Serialization (provided by Index) - don't remove this!
      */
     private static final long serialVersionUID = 1L;
-    private TreeMap<String, HashMap<Page, HashSet<Integer>>> pages;
+    private HashMap<String, HashMap<Page, HashSet<Integer>>> pages;
     private HashSet<Page> visitedPages;
 
     public WebIndex() {
-        pages = new TreeMap<>();
+        pages = new HashMap<>();
         visitedPages = new HashSet<>();
     }
 

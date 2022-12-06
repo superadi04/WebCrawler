@@ -20,6 +20,7 @@ public class WebQueryEngine {
     private char[] currQuery;
     private int currQueryIndex;
     private WebIndex index;
+    private String lastToken;
 
     private WebQueryEngine(WebIndex index) {
         this.index = index;
@@ -44,14 +45,13 @@ public class WebQueryEngine {
     public Collection<Page> query(String query) {
         try {
             this.currQuery = query.toCharArray();
-            Set<Page> ans = performQuery();
-            return ans;
+            currQueryIndex = 0;
+            return performQuery();
         } catch (Exception e) {
             System.err.println("Invalid query format.");
         }
 
-        return null;
-
+        return new HashSet<>();
     }
 
     private Set<Page> performQuery() {
@@ -66,9 +66,12 @@ public class WebQueryEngine {
         Set<Page> ans = new HashSet<>();
         Stack<String> temp = new Stack<>();
 
+        boolean edgeCase = true;
+
         while (!postfix.isEmpty()) {
-            temp.push(postfix.pop());
+            temp.push(postfix.pop().toLowerCase());
             if (temp.peek().charAt(0) == '&' || temp.peek().charAt(0) == '|') {
+                edgeCase = false;
                 char c = temp.pop().charAt(0);
                 if (c == '&') {
                     ans = intersection(index.getPagesForQuery(temp.pop()), index.getPagesForQuery(temp.pop()));
@@ -91,43 +94,15 @@ public class WebQueryEngine {
             }
         }
 
+        if (edgeCase && !temp.isEmpty()) {
+            ans = index.getPagesForQuery(temp.pop());
+        }
+
         while (!temp.isEmpty()) {
             ans = intersection(ans, index.getPagesForQuery(temp.pop()));
         }
 
         return ans;
-        /*
-
-
-        String part1 = postfix.pop();
-        String part2 = postfix.pop();
-
-        Set<Page> ans;
-
-        if (postfix.isEmpty() || postfix.peek().equals("&") || !postfix.peek().equals("|")) {
-            if (postfix.peek().equals("&")) {
-                postfix.pop();
-            }
-            ans = intersection(index.getPagesForQuery(part1), index.getPagesForQuery(part2));
-        } else {
-            ans = union(index.getPagesForQuery(part1), index.getPagesForQuery(part2));
-        }
-
-        while (!postfix.isEmpty()) {
-            String part3 = postfix.pop();
-
-            if (postfix.isEmpty() || postfix.peek().equals("&") || !postfix.peek().equals("|")) {
-                if (postfix.peek().equals("&")) {
-                    postfix.pop();
-                }
-                ans = intersection(ans, index.getPagesForQuery(part3));
-            } else {
-                ans = union(ans, index.getPagesForQuery(part3));
-            }
-        }
-
-        return ans;
-        */
     }
 
     // Shunting-Yard Algorithm
@@ -147,7 +122,10 @@ public class WebQueryEngine {
                     tokens.pop();
                 }
             } else {
-                ans.push(s);
+                if (stringCharCheck(lastToken, ')') || isAlphaNumeric(lastToken.charAt(lastToken.length() - 1))) {
+                    tokens.push('&');
+                }
+                ans.push(s.toLowerCase());
             }
             s = getToken();
         }
@@ -157,6 +135,10 @@ public class WebQueryEngine {
         }
 
         return reverseStack(ans);
+    }
+
+    private boolean isAlphaNumeric(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
 
     private Stack<String> reverseStack(Stack<String> input) {
