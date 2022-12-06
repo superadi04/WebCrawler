@@ -15,19 +15,15 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     private List<URL> urls;
     private long startTime;
     private long endTime;
-    private Stack<String> tags;
     private Set<URL> visitedURLS;
     private Page currPage;
     private int wordCount;
-    private int tagCount;
 
     public CrawlingMarkupHandler() {
         urls = new ArrayList<>();
-        tags = new Stack<>();
         index = new WebIndex();
         visitedURLS = new HashSet<>();
         wordCount = 0;
-        tagCount = 0;
     }
 
     public void setCurrPage(URL currURL) {
@@ -93,18 +89,21 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears
     */
     public void handleOpenElement(String elementName, Map<String, String> attributes, int line, int col) {
+        // Check if there are elementNames that contain links
         if (elementName.equals("a") || elementName.equals("area") || elementName.equals("base") || elementName.equals("link")) {
-            String link = attributes.get("href");
+            String link = attributes.get("href"); // Link tag
 
+            // Check if URL ends in .html or .htm
             if (link != null && (link.endsWith(".html") || link.endsWith(".htm"))) {
                 URL next;
 
                 try {
                     next = new URL(currPage.getURL(), link);
-                } catch (MalformedURLException e) {
+                } catch (MalformedURLException e) { // If URL does not work
                     return;
                 }
 
+                // Check for duplicate URLs
                 if (!visitedURLS.contains(next)) {
                     visitedURLS.add(next);
                     urls.add(next);
@@ -120,9 +119,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
     * @param col         the column in the document where this element appears.
     */
     public void handleCloseElement(String elementName, int line, int col) {
-        if (!tags.isEmpty() && tags.peek().equals(elementName)) {
-            tags.pop();
-        }
+
     }
 
     /**
@@ -151,6 +148,7 @@ public class CrawlingMarkupHandler extends AbstractSimpleMarkupHandler {
         }
     }
 
+    // Helper method to check if a character is alphanumeric
     private boolean isAlphaNumeric(char c) {
         return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }

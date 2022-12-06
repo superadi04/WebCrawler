@@ -44,14 +44,14 @@ public class Tests {
         }
 
         WebQueryEngine engine = WebQueryEngine.fromIndex(handler.getIndex());
-        Collection<Page> ans = engine.query("(\"internet is a\" | danger) the (!hello | !hi)");
+        Collection<Page> ans = engine.query("(dole & !kemp) \"medicare and medicaid\"");
         System.out.println(ans.size());
     }
 
     @Test
     public void checkAndQueryNone() {
-        WebQueryEngine engine = new WebQueryEngine();
-        engine.query("(\"internet is a\" | danger) the (!hello | !hi)");
+        //WebQueryEngine engine = new WebQueryEngine();
+        //engine.query("(\"internet is a\" | danger) the (!hello | !hi)");
     }
 
     /*

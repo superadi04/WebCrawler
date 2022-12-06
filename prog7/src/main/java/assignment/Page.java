@@ -30,6 +30,7 @@ public class Page implements Serializable {
      */
     public URL getURL() { return url; }
 
+    // Overrided method used for hashing
     @Override
     public boolean equals(Object obj) {
         Page p = (Page) obj;

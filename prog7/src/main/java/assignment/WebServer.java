@@ -35,6 +35,7 @@ public class WebServer {
      * Open the server to incoming connections, loop and respond.
      */
     public void serve() throws IOException {
+        FileInputStream fis = new FileInputStream(new File("tsoogle.png"));
         int port = 1989;
         ServerSocket serverSocket = new ServerSocket(port);
         System.err.println("Running server on port: " + port);
