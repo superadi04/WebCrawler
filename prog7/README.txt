@@ -1,6 +1,3 @@
-We provide some skeleton code to get you started.  It is incomplete and not of the highest quality.
-Your assignment submission, naturally, will be complete and of the highest quality.
-
 == INCLUDED FILES ==
 
 README.txt                 This file
